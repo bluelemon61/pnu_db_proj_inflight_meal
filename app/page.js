@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link";
+
 export default function Home() {
 
   async function sqltest() {
@@ -9,10 +11,29 @@ export default function Home() {
   }
 
   return (
-    <div>
-      <button className="p-5 bg-red" onClick={(e) => {
-        sqltest();
-      }}>SQL TEST</button>
+    <div className="flex flex-col gap-12">
+      <button
+        className="p-5 bg-gray-300" 
+        onClick={(e) => {
+          sqltest();
+        }}
+      >
+        SQL TEST
+      </button>
+      <div className="flex justify-stretch gap-12">
+        <Link href={'/captain'} className="flex w-full justify-center py-24 bg-gray-300">
+          기장
+        </Link>
+        <Link href={'/crew'} className="flex w-full justify-center py-24 bg-gray-300">
+          승무원
+        </Link>
+        <Link href={'/passenger'} className="flex w-full justify-center py-24 bg-gray-300">
+          승객
+        </Link>
+        <Link href={'/provider'} className="flex w-full justify-center py-24 bg-gray-300">
+          음식 공급 업체
+        </Link>
+      </div>
     </div>
   )
 }
