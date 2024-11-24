@@ -1,5 +1,6 @@
 import localFont from "next/font/local";
 import "./globals.css";
+import Link from "next/link";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,9 +22,20 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased p-12`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
       >
-        {children}
+        <nav className="fixed flex items-center px-4 py-2 w-full justify-between bg-white">
+          <h1 className="font-black">24-2 DB 텀프로젝트 기내식서비스</h1>
+          <Link 
+            className="bg-gray-100 px-4 py-2 font-black"
+            href={'/'}
+          >
+            메인페이지로 돌아가기
+          </Link>
+        </nav>
+        <div className="px-12 py-16">
+          {children}
+        </div>
       </body>
     </html>
   );
