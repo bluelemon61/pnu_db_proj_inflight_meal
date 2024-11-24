@@ -13,7 +13,13 @@ module.exports = {
       },
       borderWidth: {
         "1": "1px",
-      }
+      },
+      width: {
+        "crew": "1280px",
+      },
+      borderRadius:{
+        "airplain": "7.5rem",
+      },
     },
   },
   plugins: [],
