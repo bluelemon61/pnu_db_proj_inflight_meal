@@ -69,6 +69,21 @@ export default function Provider() {
                 <button className="bg-blue-300 py-1 px-4">반영</button>
               </div>
             </div>
+            <div className="flex gap-4 justify-between py-2 border-b-1 border-black">
+              <div className="w-1/4 text-center">
+                <input />
+              </div>
+              <div className="w-1/4 text-center">
+                <input />
+              </div>
+              <div className="w-1/4 text-center">
+                <input type="number"/>
+              </div>
+              <div className="w-1/4 text-center flex justify-center gap-2">
+                <button className="bg-red-300 py-1 px-4">초기화</button>
+                <button className="bg-green-300 py-1 px-4">추가</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
