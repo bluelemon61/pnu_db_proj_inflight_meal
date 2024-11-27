@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
  * @returns 
  */
 export async function POST(request){
-  // user_id<string>: 음식 제공 업체 유저 id
+  // user_id<number>: 음식 제공 업체 유저 id
   // category<string>: 분류
   // name<string>: 음식명
   // count<number>: 재고 개수
@@ -31,8 +31,10 @@ export async function POST(request){
  * @returns 
  */
 export async function GET(request){
-  // user_id<string>: 음식 제공 업체 유저 id
-  const {user_id} = await request.json();
+  const searchParams = request.nextUrl.searchParams;
+  
+  // user_id<number>: 음식 제공 업체 유저 id
+  const user_id = parseInt(searchParams.get('user_id'));
 
   const data = null;
 
@@ -51,7 +53,7 @@ export async function GET(request){
  * @returns 
  */
 export async function PUT(request){
-  // user_id<string>: 음식 제공 업체 유저 id
+  // user_id<number>: 음식 제공 업체 유저 id
   // food_id<number>: 음식 id
   // count<number>: 재고 개수
   const {user_id, food_id, count} = await request.json();
@@ -73,7 +75,7 @@ export async function PUT(request){
  * @returns 
  */
 export async function DELETE(request){
-  // user_id<string>: 음식 제공 업체 유저 id
+  // user_id<number>: 음식 제공 업체 유저 id
   // food_id<number>: 음식 id
   const {user_id, food_id} = await request.json();
 

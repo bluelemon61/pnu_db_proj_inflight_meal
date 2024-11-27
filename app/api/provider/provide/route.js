@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
  * @returns 
  */
 export async function POST(request){
-  // user_id<string>: 음식 제공 업체 유저 id
+  // user_id<number>: 음식 제공 업체 유저 id
   // flight_number<number>: 항공편 id
   // food_id<number>: 음식 id
   // count<number>: 재고 개수
@@ -31,9 +31,12 @@ export async function POST(request){
  * @returns 
  */
 export async function GET(request){
-  // user_id<string>: 음식 제공 업체 유저 id
+  const searchParams = request.nextUrl.searchParams;
+
+  // user_id<number>: 음식 제공 업체 유저 id
   // flight_number<number>: 항공편 id
-  const {user_id, flight_number} = await request.json();
+  const user_id = parseInt(searchParams.get('user_id'));
+  const flight_number = parseInt(searchParams.get('flight_number'));
 
   const data = null;
 
@@ -51,7 +54,7 @@ export async function GET(request){
  * @returns 
  */
 export async function PUT(request){
-  // user_id<string>: 음식 제공 업체 유저 id
+  // user_id<number>: 음식 제공 업체 유저 id
   // flight_number<number>: 항공편 id
   // food_id<number>: 음식 id
   // count<number>: 재고 개수
@@ -73,7 +76,7 @@ export async function PUT(request){
  * @returns 
  */
 export async function DELETE(request){
-  // user_id<string>: 음식 제공 업체 유저 id
+  // user_id<number>: 음식 제공 업체 유저 id
   // flight_number<number>: 항공편 id
   // food_id<number>: 음식 id
   const {user_id, flight_number, food_id} = await request.json();

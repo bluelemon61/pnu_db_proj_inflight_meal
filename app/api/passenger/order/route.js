@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
  */
 export async function POST(request){
   // flight_number<number>: 항공기 id
-  // food_id<id>: 음식 id (food table)
+  // food_id<number>: 음식 id (food table)
   // user_id<string>: 승객의 id
   const {flight_number, food_id, user_id} = await request.json();
 
@@ -30,9 +30,12 @@ export async function POST(request){
  * @returns 
  */
 export async function GET(request){
+  const searchParams = request.nextUrl.searchParams;
+  
   // flight_number<number>: 항공기 id
-  // user_id<number>: 승객의 id
-  const {flight_number} = await request.json();
+  // user_id<string>: 승객의 id
+  const flight_number = parseInt(searchParams.get('flight_number'));
+  const user_id = parseInt(searchParams.get('user_id'));
 
   const data = null;
 
