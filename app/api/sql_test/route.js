@@ -18,7 +18,18 @@ export async function GET(reqeust){
 
   client.connect();
 
-  const data = await client.query("SELECT * FROM users;");
+  const data = await client.query("SELECT \
+        ff.food_id,\
+        f.name AS food_name,\
+        f.category,\
+        ff.food_count,\
+        f.like_count,\
+        f.hate_count,\
+        ff.food_target\
+      FROM flight_food ff\
+      JOIN food f ON ff.food_id = f.id\
+      WHERE ff.flight_number = 100\
+    ;");
 
   console.log(data.rows);
 
