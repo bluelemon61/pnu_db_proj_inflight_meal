@@ -46,19 +46,6 @@ export default function Captain() {
     }
   }
 
-  // 기내식 제공 상태 가져오는 함수
-  async function fetchMealServiceStatus() {
-    try {
-      const response = await fetch(`/api/captain/serve?flight_number=100`);
-      const result = await response.json();
-
-      if (result.success) {
-        setMealService(result.serve);
-      }
-    } catch (error) {
-      console.error("Error fetching meal service status:", error);
-    }
-  }
 
   // 기내식 제공 상태 업데이트 함수
   async function updateMealServiceStatus(status) {
@@ -94,7 +81,6 @@ export default function Captain() {
   // 컴포넌트가 마운트될 때 데이터 가져오기
   useEffect(() => {
     fetchFlightFood();
-    fetchMealServiceStatus();
   }, []);
 
   return (
