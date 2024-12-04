@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 
 export default function Captain() {
   const [flightFood, setFlightFood] = useState([]); // 기내식 데이터 상태 관리
-  const [mealService, setMealService] = useState(false); // 기내식 제공 시간 상태
+  const [mealService, setMealService] = useState(false); // 기내식 제공 상태 관리
+  const [loading, setLoading] = useState(false); // 로딩 상태
 
   // 비행 상태 업데이트 함수
   async function updateFlightState(state) {
@@ -45,14 +46,55 @@ export default function Captain() {
     }
   }
 
-  // 기내식 제공 시간 토글 함수
-  function toggleMealService(status) {
-    setMealService(status);
-    alert(`기내식 제공이 ${status ? "시작" : "중단"}되었습니다.`);
+  // 기내식 제공 상태 가져오는 함수
+  async function fetchMealServiceStatus() {
+    try {
+      const response = await fetch(`/api/captain/serve?flight_number=100`);
+      const result = await response.json();
+
+      if (result.success) {
+        setMealService(result.serve);
+      }
+    } catch (error) {
+      console.error("Error fetching meal service status:", error);
+    }
   }
 
+  // 기내식 제공 상태 업데이트 함수
+  async function updateMealServiceStatus(status) {
+    try {
+      setLoading(true); // 로딩 상태 활성화
+      const response = await fetch("/api/captain/serve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          flight_number: 100,
+          serve: status,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setMealService(status); // 상태 업데이트
+        alert(`기내식 제공이 ${status ? "시작" : "중단"}되었습니다.`);
+      } else {
+        alert(`업데이트 실패: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Error updating meal service status:", error);
+      alert("기내식 제공 상태 업데이트 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false); // 로딩 상태 비활성화
+    }
+  }
+
+  // 컴포넌트가 마운트될 때 데이터 가져오기
   useEffect(() => {
-    fetchFlightFood(); // 컴포넌트 마운트 시 데이터 가져오기
+    fetchFlightFood();
+    fetchMealServiceStatus();
   }, []);
 
   return (
@@ -102,13 +144,15 @@ export default function Captain() {
           <div className="flex gap-8">
             <button
               className={`w-full py-12 ${mealService ? "bg-gray-400" : "bg-gray-100"}`}
-              onClick={() => toggleMealService(true)}
+              onClick={() => updateMealServiceStatus(true)}
+              disabled={loading || mealService}
             >
               ON
             </button>
             <button
               className={`w-full py-12 ${!mealService ? "bg-gray-400" : "bg-gray-100"}`}
-              onClick={() => toggleMealService(false)}
+              onClick={() => updateMealServiceStatus(false)}
+              disabled={loading || !mealService}
             >
               OFF
             </button>
