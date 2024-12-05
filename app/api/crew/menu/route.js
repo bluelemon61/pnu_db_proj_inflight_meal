@@ -72,9 +72,46 @@ export async function POST(request){
   // user_id<string>: 승객(승무원)의 id
   const {flight_number, food_id, user_id} = await request.json();
 
-  const data = null;
-
-  return new NextResponse(data, {
-    status: 200,
+  const client = new Client({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
   });
+
+
+  await client.connect();
+
+  await client.query('BEGIN');
+  const query1 = `
+    UPDATE flight_food
+    SET food_count = food_count - 1
+    WHERE food_id = $1 AND flight_number = $2 AND food_count > 0
+  `;
+  const result1 = await client.query(query1, [food_id, flight_number]);
+
+  if (result1.rowCount === 0) {
+    await client.query('ROLLBACK');
+    await client.end();
+    return new NextResponse(JSON.stringify({ success: false, message: "flight_food 오류" }), { status: 400 });
+  }
+
+  const query2 = `
+    UPDATE flight_user
+    SET eat_count = eat_count + 1
+    WHERE user_id = $1 AND flight_number = $2 AND eat_count = 0;
+  `;
+  const result2 = await client.query(query2, [user_id, flight_number]);
+
+  if (result2.rowCount === 0) {
+    await client.query('ROLLBACK');
+    await client.end();
+    return new NextResponse(JSON.stringify({ success: false, message: "flight_user 오류" }), { status: 400 });
+  }
+
+  client.query('COMMIT');
+
+  await client.end();
+  return new NextResponse(null, { status: 200 });
 }

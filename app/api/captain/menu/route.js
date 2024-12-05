@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import { Client } from "pg";
 
+/**
+ * 기내식 목록을 불러온다.
+ * 
+ * 권한: 기장(captain)
+ * 
+ * @param {*} request 
+ * @returns 
+ */
 export async function GET(request) {
   const searchParams = request.nextUrl.searchParams;
   const flight_number = parseInt(searchParams.get("flight_number"));
@@ -60,6 +68,49 @@ export async function GET(request) {
     await client.end();
 
     return new NextResponse(JSON.stringify(result.rows), { status: 200 });
+  } catch (error) {
+    console.error("Error fetching menu:", error);
+    return new NextResponse(
+      JSON.stringify({ success: false, message: "Failed to fetch menu" }),
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * 기내식 제공 대상을 변경한다.
+ * 
+ * 권한: 기장(captain)
+ * 
+ * @param {*} request 
+ * @returns 
+ */
+export async function PUT(request) {
+  const { flight_number, food_id, food_target } = await request.json();
+
+  const client = new Client({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+  });
+
+  try {
+    await client.connect();
+
+    const query = `
+      UPDATE
+        flight_food
+      SET
+        food_target = $3
+      WHERE flight_number = $1 AND food_id = $2
+    `;
+    const result = await client.query(query, [flight_number, food_id, food_target]);
+  
+    await client.end();
+
+    return new NextResponse(null, { status: 200 });
   } catch (error) {
     console.error("Error fetching menu:", error);
     return new NextResponse(

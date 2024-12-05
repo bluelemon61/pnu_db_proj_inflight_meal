@@ -1,11 +1,12 @@
 "use client";
 
 import { postAirplainStatus } from "@/apis/captain/airplain";
-import { getAirplainMenu } from "@/apis/captain/menu";
+import { getAirplainMenu, putAirplainMenu } from "@/apis/captain/menu";
 import { postAirplainServe } from "@/apis/captain/serve";
 import { postAirplainMenu } from "@/apis/crew/menu";
 import { getAirplainStatus } from "@/apis/crew/status";
-import { useState, useEffect } from "react";
+import useInterval from "@/hooks/useInterval";
+import { useState } from "react";
 
 export default function Captain() {
   const [flightFood, setFlightFood] = useState([]); // 기내식 데이터 상태 관리
@@ -24,7 +25,6 @@ export default function Captain() {
       const result = await postAirplainStatus(flightNumber, state)
 
       if (result) {
-        alert(`비행 상태가 '${state}'로 업데이트되었습니다.`);
         setFlightState(state);
       } else {
         alert(`업데이트 실패`);
@@ -40,28 +40,27 @@ export default function Captain() {
     try {
       const data = await getAirplainMenu(flightNumber, null);
       setFlightFood(data); // 상태 업데이트
-      console.log("Fetched flight food:", data); // 확인용 로그
     } catch (error) {
       console.error("Error fetching flight food data:", error);
     }
   }
 
-    // 기장 기내식 데이터 가져오는 함수
-    async function fetchCaptainFood() {
-      try {
-        const data = await getAirplainMenu(flightNumber, '기장');
-        setCaptainFood(data); // 상태 업데이트
-        console.log("Fetched flight food:", data); // 확인용 로그
-      } catch (error) {
-        console.error("Error fetching flight food data:", error);
-      }
+  // 기장 기내식 데이터 가져오는 함수
+  async function fetchCaptainFood() {
+    try {
+      const data = await getAirplainMenu(flightNumber, '기장');
+      setCaptainFood(data); // 상태 업데이트
+    } catch (error) {
+      console.error("Error fetching flight food data:", error);
     }
+  }
 
   // 비행기 상태 가져오는 함수
   async function fetchFlightStatus() {
     try {
       const data = await getAirplainStatus(flightNumber);
       setFlightState(data.flight_state); // 상태 업데이트
+      setMealService(data.serve);
     } catch (error) {
       console.error("Error fetching flight food data:", error);
     }
@@ -76,7 +75,6 @@ export default function Captain() {
 
       if (success) {
         setMealService(status); // 상태 업데이트
-        alert(`기내식 제공이 ${status ? "시작" : "중단"}되었습니다.`);
       } else {
         alert(`업데이트 실패`);
       }
@@ -89,11 +87,11 @@ export default function Captain() {
   }
 
   // 컴포넌트가 마운트될 때 데이터 가져오기
-  useEffect(() => {
+  useInterval(() => {
     fetchFlightFood();
     fetchCaptainFood();
     fetchFlightStatus();
-  }, []);
+  }, 3000);
 
   return (
     <div className="flex flex-col gap-8">
@@ -164,9 +162,10 @@ export default function Captain() {
                   <div className="w-1/6 text-center">{food.like_count}</div>
                   <div className="w-1/6 text-center">{food.hate_count}</div>
                   <div 
-                    className="w-1/6 text-center"
+                    className="w-1/6 text-center hover:bg-white hover:cursor-pointer"
                     onClick={()=>{
-                      
+                      const target = food.food_target === '승객' ? '기장' : '승객';
+                      putAirplainMenu(flightNumber, food.food_id, target);
                     }}
                   >{food.food_target}</div>
                 </div>

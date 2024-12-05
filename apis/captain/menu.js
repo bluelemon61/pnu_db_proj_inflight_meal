@@ -8,9 +8,9 @@
  * @param {string} food_target 제공할 대상 (승객, 직원)
  * @returns 
  */
-export async function postAirplainMenu(flight_number, food_id, food_target) {
+export async function putAirplainMenu(flight_number, food_id, food_target) {
   const res = await fetch(`/api/captain/menu`, {
-    method: 'POST',
+    method: 'PUT',
     body: JSON.stringify({
       flight_number,
       food_id,
@@ -18,9 +18,8 @@ export async function postAirplainMenu(flight_number, food_id, food_target) {
     }),
   });
 
-  const data = await res.json();
-
-  return data;
+  if (res.status < 300) return true;
+  return false;
 }
 
 /**
