@@ -1,6 +1,7 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import Link from "next/link";
+import AirplainStateBox from "@/components/AirplainStateBox";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -36,6 +37,7 @@ export default function RootLayout({ children }) {
         <div className="px-12 py-16">
           {children}
         </div>
+        <AirplainStateBox />
       </body>
     </html>
   );
