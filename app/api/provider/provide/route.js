@@ -11,7 +11,7 @@ import { Client } from "pg";
  */
 export async function POST(request) {
   // 요청 데이터에서 user_id, flight_number, food_id, count 추출
-  const { flight_number, category, name, food_count } = await request.json();
+  const { user_id, flight_number, id, food_count } = await request.json();
 
   const client = new Client({
     user: process.env.DB_USER,
@@ -27,12 +27,12 @@ export async function POST(request) {
   // flight_food에 데이터를 삽입하는 쿼리
   const query = `
     INSERT INTO flight_food (flight_number, food_id, food_count, food_target)
-    SELECT $1, id, $2, '기장'
+    SELECT $1, id, $3, '기장'
     FROM food
-    WHERE category = $3 AND name = $4
+    WHERE food.id = $2
     RETURNING food_id, food_count, food_target;
   `;
-  const result = await client.query(query, [flight_number, food_count, category, name]);
+  const result = await client.query(query, [flight_number, id, food_count]);
 
   await client.end();
 
@@ -88,10 +88,11 @@ export async function GET(request) {
   // flight_food 목록 조회
   const query = `
     SELECT 
-      ff.id AS flight_food_id,
+      ff.id,
       ff.flight_number,
       ff.food_count,
       ff.food_target,
+      ff.food_id,
       f.category,
       f.name,
       f.provider
