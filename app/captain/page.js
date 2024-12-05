@@ -163,7 +163,12 @@ export default function Captain() {
                   <div className="w-1/6 text-center">{food.food_count}</div>
                   <div className="w-1/6 text-center">{food.like_count}</div>
                   <div className="w-1/6 text-center">{food.hate_count}</div>
-                  <div className="w-1/6 text-center">{food.food_target}</div>
+                  <div 
+                    className="w-1/6 text-center"
+                    onClick={()=>{
+                      
+                    }}
+                  >{food.food_target}</div>
                 </div>
               ))
             ) : (

@@ -4,7 +4,8 @@ import { getEatStatus } from "@/apis/crew/eat-check";
 import { getAirplainMenu, postAirplainMenu } from "@/apis/crew/menu";
 import { getSleepStatus } from "@/apis/crew/sleep-check";
 import { getAirplainStatus } from "@/apis/crew/status";
-import { Fragment, useState, useEffect } from "react";
+import useInterval from "@/hooks/useInterval";
+import { Fragment, useState } from "react";
 
 export default function Crew() {
   const [rows, setRows] = useState(5);
@@ -21,7 +22,7 @@ export default function Crew() {
   const [crewId, setCrewId] = useState(2);
 
 
-  useEffect(() => {
+  useInterval(() => {
     const flightGetter = async () => {
       const flightData = await getAirplainStatus(flightNumber);
       setFlightState(flightData.flight_state || "알 수 없음");
@@ -53,7 +54,7 @@ export default function Crew() {
     flightGetter();
     menuGetter();
     passGetter();
-  }, []);
+  }, 3000);
 
   return (
     <div className="flex flex-col gap-8 w-crew">
