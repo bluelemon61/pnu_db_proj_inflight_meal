@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Client } from "pg";
+import { Client, Pool } from "pg";
 
 /**
  * 항공기 기내식 목록에 기내식을 추가한다.
@@ -13,16 +13,30 @@ export async function POST(request) {
   // 요청 데이터에서 user_id, flight_number, food_id, count 추출
   const { user_id, flight_number, id, food_count } = await request.json();
 
-  const client = new Client({
+  const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
   });
+  const client = await pool.connect();
 
-
-  await client.connect();
+  await client.query('BEGIN');
+  const checkquery = `
+    SELECT *
+    FROM flight
+    WHERE flight_number = $1 AND flight_state = '착륙';
+  `
+  const checkResult = await client.query(checkquery, [flight_number]);
+  if (checkResult.rows.length == 0) {
+    await client.query('ROLLBACK');
+    client.release();
+    return new NextResponse(
+      JSON.stringify({ success: false, message: "착륙 상태가 아님" }),
+      { status: 400 }
+    );
+  }
 
   // flight_food에 데이터를 삽입하는 쿼리
   const query = `
@@ -34,7 +48,9 @@ export async function POST(request) {
   `;
   const result = await client.query(query, [flight_number, id, food_count]);
 
-  await client.end();
+  client.query('COMMIT');
+
+  client.release();
 
   // 삽입 성공 시 응답
   if (result.rowCount > 0) {
@@ -128,16 +144,30 @@ export async function PUT(request) {
   // count<number>: 재고 개수
   const { user_id, flight_number, food_id, count } = await request.json();
 
-  const client = new Client({
+  const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
   });
+  const client = await pool.connect();
 
-  
-  await client.connect();
+  await client.query('BEGIN');
+  const checkquery = `
+    SELECT *
+    FROM flight
+    WHERE flight_number = $1 AND flight_state = '착륙';
+  `
+  const checkResult = await client.query(checkquery, [flight_number]);
+  if (checkResult.rows.length == 0) {
+    await client.query('ROLLBACK');
+    client.release();
+    return new NextResponse(
+      JSON.stringify({ success: false, message: "착륙 상태가 아님" }),
+      { status: 400 }
+    );
+  }
 
   // 기내식 재고 수정 쿼리
   const query = `
@@ -153,7 +183,9 @@ export async function PUT(request) {
 
   const result = await client.query(query, [count, flight_number, food_id, user_id]);
 
-  await client.end();
+  client.query('COMMIT');
+
+  client.release();
 
   return new NextResponse(
     JSON.stringify({
@@ -178,15 +210,30 @@ export async function DELETE(request) {
   // Request body에서 필요한 데이터 추출
   const { user_id, flight_number, food_id } = await request.json();
 
-  const client = new Client({
+  const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
   });
+  const client = await pool.connect();
 
-  await client.connect();
+  await client.query('BEGIN');
+  const checkquery = `
+    SELECT *
+    FROM flight
+    WHERE flight_number = $1 AND flight_state = '착륙';
+  `
+  const checkResult = await client.query(checkquery, [flight_number]);
+  if (checkResult.rows.length == 0) {
+    await client.query('ROLLBACK');
+    client.release();
+    return new NextResponse(
+      JSON.stringify({ success: false, message: "착륙 상태가 아님" }),
+      { status: 400 }
+    );
+  }
 
   // 삭제 쿼리 실행
   const query = `
@@ -200,7 +247,9 @@ export async function DELETE(request) {
   `;
   const result = await client.query(query, [flight_number, food_id, user_id]);
 
-  await client.end();
+  client.query('COMMIT');
+
+  client.release();
 
   // 성공 응답 반환
   return new NextResponse(

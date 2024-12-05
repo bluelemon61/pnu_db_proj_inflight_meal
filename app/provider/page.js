@@ -72,7 +72,7 @@ export default function Provider() {
                         className="bg-red-500 py-1 px-4 text-white"
                         onClick={async () => {
                           const result = await deleteMenu(providerId, food.id);
-                          if (result) alert('비행기 재고에서 삭제되었습니다.');
+                          if (result) alert('제공 가능 기내식 목록에서 삭제되었습니다.');
                         }}
                       >
                         삭제

@@ -17,7 +17,5 @@ export async function getSleepStatus(flight_number) {
 
   const data = await res.json();
 
-  console.log(data);
-
   return data;
 }

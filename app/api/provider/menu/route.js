@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Client } from "pg"; // Client를 pg에서 가져옵니다.
+import { Client, Pool } from "pg";
 
 /**
  * 업체 제공 가능 기내식 목록에 기내식을 추가한다.
@@ -127,17 +127,32 @@ export async function PUT(request){
 export async function DELETE(request) {
   // user_id<number>: 음식 제공 업체 유저 id
   // food_id<number>: 음식 id
-  const {user_id, food_id } = await request.json();
+  const { user_id, food_id } = await request.json();
 
-  const client = new Client({
+  const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
   });
+  const client = await pool.connect();
 
-  await client.connect();
+  await client.query('BEGIN');
+  const checkquery = `
+    SELECT *
+    FROM flight_food
+    WHERE food_id = $1
+  `
+  const checkResult = await client.query(checkquery, [food_id]);
+  if (checkResult.rows.length) {
+    await client.query('ROLLBACK');
+    client.release();
+    return new NextResponse(
+      JSON.stringify({ success: false, message: "재고를 싣고 있는 비행기 존재" }),
+      { status: 400 }
+    );
+  }
 
   // 음식 제공 업체가 자신이 등록한 음식만 삭제 가능하도록 조건 설정
   const query = `
@@ -146,7 +161,9 @@ export async function DELETE(request) {
   `;
   const result = await client.query(query, [food_id, user_id]);
 
-  await client.end();
+  client.query('COMMIT');
+
+  client.release();
 
   if (result.rowCount === 0) {
     // 삭제된 행이 없으면 잘못된 `food_id`나 권한 부족일 가능성

@@ -91,7 +91,8 @@ export async function deleteMenu(user_id, food_id) {
     }),
   });
 
-  const data = await res.json();
+  if (res.status < 300) return true;
 
-  return data;
+  alert(`해당 기내식을 싣고 있는 비행기가 존재합니다.`);
+  return false;
 }

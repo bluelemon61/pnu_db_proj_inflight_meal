@@ -1,17 +1,11 @@
-import localFont from "next/font/local";
+import { Noto_Sans_KR } from 'next/font/google';
 import "./globals.css";
 import Link from "next/link";
 import AirplainStateBox from "@/components/AirplainStateBox";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+const notoSansKr = Noto_Sans_KR({
+  subsets: ['latin'],
+  variable: '--NotoSans'
 });
 
 export const metadata = {
@@ -23,9 +17,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
+        className={`${notoSansKr.className} antialiased relative`}
       >
-        <nav className="fixed flex items-center px-4 py-2 w-full justify-between bg-white">
+        <nav className="fixed flex items-center px-4 py-2 w-full justify-between bg-white z-10 border-b-1">
           <h1 className="font-black">24-2 DB 텀프로젝트 기내식서비스</h1>
           <Link 
             className="bg-gray-100 px-4 py-2 font-black"

@@ -47,7 +47,6 @@ export default function Passenger() {
     const orderFetcher = async () => {
       const data = await getOrder(flightNumber, seatNumber);
       setOrdered(data);
-      console.log(data);
     }
 
     menuFetcher();

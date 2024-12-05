@@ -21,6 +21,8 @@ export async function postMenuOfFlight(user_id, flight_number, id, food_count) {
   });
 
   if (res.status < 300) return true;
+  
+  alert(`비행기가 '착륙' 상태일 때만 수정 및 삭제가 가능합니다.`);
   return false;
 }
 
@@ -69,6 +71,8 @@ export async function putMenuOfFlight(user_id, flight_number, food_id, count) {
   });
 
   if (res.status < 300) return true;
+
+  alert(`비행기가 '착륙' 상태일 때만 수정 및 삭제가 가능합니다.`);
   return false;
 }
 
@@ -93,5 +97,7 @@ export async function deleteMenuOfFlight(user_id, flight_number, food_id) {
   });
 
   if (res.status < 300) return true;
+
+  alert(`비행기가 '착륙' 상태일 때만 수정 및 삭제가 가능합니다.`);
   return false;
 }

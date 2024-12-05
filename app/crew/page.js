@@ -59,7 +59,7 @@ export default function Crew() {
       <div className="flex flex-col gap-4">
         <h1 className="font-black text-2xl">대시보드</h1>
         <div className="relative flex flex-col items-center">
-          <div className="absolute left-0">
+          <div className="absolute left-0 p-4 bg-white/70 border-1">
             <p>비행기 상태 - {flightState}</p>
             <p>기내식 - {mealService}</p>
           </div>
@@ -149,12 +149,17 @@ export default function Crew() {
             ))}
           </div>
           <div className="px-8 py-24 bg-gray-200" />
+          {
+            selectedFood
+            ? <div className="absolute w-full flex p-4 border-2 left-0 bottom-24 gap-4 bg-white/80 justify-center">
+                '{selectedFood.food_name}' 을/를 주문한 승객을 표시합니다.<br/>좌석 클릭 시 기내식을 제공할 수 있습니다.
+              </div>
+            : undefined
+          }
           <div className="absolute w-full flex left-0 bottom-0 gap-4">
-            <button
-              className="w-1/6 py-8 bg-sky-400 text-white"
-            >
+            <div className="w-1/6 py-8 bg-sky-400 text-white text-center">
               기내식 메뉴
-            </button>
+            </div>
             <button className="px-2 py-8 bg-white border-1 border-black">&lt;</button>
             <div className="w-full flex gap-2">
               {passFood.map((food) => (

@@ -16,7 +16,7 @@ export async function POST(request) {
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
   });
-  const client = await pool.connect(); // 연결 풀에서 클라이언트 가져오기
+  const client = await pool.connect();
   try {
     // * @param {number} flight_number 항공기 id
     // * @param {string} flight_state 항공기 상태 (이륙, 순항, 난기류, ...)
