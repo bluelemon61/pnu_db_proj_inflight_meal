@@ -43,13 +43,10 @@ export default function Crew() {
       const sortedPassEat = passEatData.sort((a,b) => a.seat_number - b.seat_number);
       setPassEat(sortedPassEat);
 
-      console.log('passEat', sortedPassEat);
-
       const passSleepData = await getSleepStatus(flightNumber);
       const sortedPassSleep = passSleepData.sort((a,b) => a.seat_number - b.seat_number);
       setPassSleep(sortedPassSleep);
 
-      console.log('passSleep', sortedPassSleep);
     }
 
     flightGetter();
@@ -129,17 +126,17 @@ export default function Crew() {
                                 : `bg-${passSleep[r*cols+c].sleep_state.toLowerCase()}`
                               : `bg-gray-500`
                         }`}
-                        onClick={() => {
+                        onClick={async () => {
                           if (selectedFood) {
                             const seatNumber = r*cols + c + 1;
-                            console.log(seatNumber);
                             if (mealService === '제공 불가') 
                               return alert('기내식 제공이 불가합니다.');
                             if (selectedFood.id !== passEat[seatNumber - 1].food_order)
                               return alert(`'${selectedFood.food_name}' 주문하지 않은 승객입니다.`);
                             if (passSleep[seatNumber - 1].sleep_state.toLowerCase() === 'nottouch')
                               return alert(`승객이 일어난 후 제공하세요.`);
-                            postAirplainMenu(flightNumber, selectedFood.food_id, passEat[seatNumber - 1].user_id);
+                            const result = await postAirplainMenu(flightNumber, selectedFood.food_id, passEat[seatNumber - 1].user_id);
+                            if (!result) alert('음식 제공에 실패하였습니다.');
                           }
                         }}
                       >

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Client } from "pg";
+import { Client, Pool } from "pg";
 
 /**
  * 기내식 목록을 불러온다. (승무원용)
@@ -72,16 +72,14 @@ export async function POST(request){
   // user_id<string>: 승객(승무원)의 id
   const {flight_number, food_id, user_id} = await request.json();
 
-  const client = new Client({
+  const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
   });
-
-
-  await client.connect();
+  const client = await pool.connect();
 
   await client.query('BEGIN');
   const query1 = `
@@ -112,6 +110,7 @@ export async function POST(request){
 
   client.query('COMMIT');
 
-  await client.end();
+  client.release();
+  
   return new NextResponse(null, { status: 200 });
 }
