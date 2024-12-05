@@ -33,11 +33,12 @@ export async function postReview(flight_number, user_id, food_order, is_like) {
  * @param {number} flight_number 항공기 id
  * @param {number} user_id 승객의 id
  * @param {number} food_id 음식 id
+ * @param {boolean} is_like 선호 여부
  * @returns 
  */
 export async function getReview(flight_number, user_id, food_id) {
   const queryParameters = new URLSearchParams({
-    flight_number, user_id, food_id
+    flight_number, user_id, food_id , is_like
   }).toString();
 
   const res = await fetch(`/api/passenger/review?${queryParameters}`, {
@@ -45,17 +46,6 @@ export async function getReview(flight_number, user_id, food_id) {
   });
 
   const data = await res.json();
-
-  if (!data) {
-    return {
-      user_id: 2,
-      food_order: 1,
-      category: '양식',
-      name: '함박 스테이크',
-      like_count: 4,
-      hate_count: 6,
-    }
-  }
 
   return data;
 }

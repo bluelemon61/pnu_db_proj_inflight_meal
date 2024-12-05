@@ -1,22 +1,38 @@
 import { NextResponse } from "next/server";
+import { Client } from "pg";
 
-/**
- * 승객들의 식사 상태를 확인한다.
- * 
- * 권한: 승무원(crew)
- * 
- * @param {*} request 
- * @returns 
- */
-export async function GET(request){
-  const searchParams = request.nextUrl.searchParams;
-  
-  // flight_number<number>: 항공기 id
-  const flight_number = parseInt(searchParams.get('flight_number'));
+export async function POST(request) {
+  const { food_id, flight_number } = await request.json();
 
-  const data = null;
+  if (!food_id || !flight_number) {
+    return new NextResponse(JSON.stringify({ success: false, message: "Invalid data" }), { status: 400 });
+  }
 
-  return new NextResponse(data, {
-    status: 200,
+  const client = new Client({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
   });
+
+  try {
+    await client.connect();
+    const query = `
+      UPDATE flight_food
+      SET food_count = food_count - 1
+      WHERE food_id = $1 AND flight_number = $2 AND food_count > 0
+    `;
+    const result = await client.query(query, [food_id, flight_number]);
+
+    if (result.rowCount === 0) {
+      return new NextResponse(JSON.stringify({ success: false, message: "No stock left" }), { status: 400 });
+    }
+
+    await client.end();
+    return new NextResponse(JSON.stringify({ success: true }), { status: 200 });
+  } catch (error) {
+    console.error("Error updating food count:", error);
+    return new NextResponse(JSON.stringify({ success: false, message: "Failed to update stock" }), { status: 500 });
+  }
 }

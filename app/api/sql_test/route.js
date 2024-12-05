@@ -20,9 +20,19 @@ export async function GET(reqeust){
 
   const data = await client.query(
     `
-    select *
-    from flight_food
-    `)
+      SELECT
+        fu.user_id,
+        fu.food_order,
+        ff.food_id,
+        f.name AS food_name,
+        f.category AS food_category,
+        fu.eat_count
+      FROM flight_user fu
+      LEFT JOIN flight_food ff ON fu.food_order = ff.id
+      LEFT JOIN food f ON ff.food_id = f.id
+      WHERE fu.flight_number = 100 AND fu.user_id = 5;
+    `
+    )
 
   console.log(data.rows);
 
