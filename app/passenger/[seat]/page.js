@@ -18,7 +18,7 @@ export default function Passenger() {
 
   const [foodList, setFoodList] = useState({});
   const [passengerState, setPassengerState] = useState(null);
-  const [ordered, setOrdered] = useState(null);
+  const [ordered, setOrdered] = useState({id: null});
   const [airplainStatus, setAirPlainStatus] = useState(null);
   const [eaten, setEaten] = useState(0);
 
@@ -105,7 +105,7 @@ export default function Passenger() {
                               onClick={() => {
                                 if (eaten)
                                   return alert('이미 식사를 완료하였습니다.');
-                                if (ordered)
+                                if (ordered.id)
                                   return alert('이미 주문을 완료하였습니다.');
                                 if (confirm(`${food.name} 주문하시겠습니까?\n주문 변경은 불가합니다.`)){
                                   setOrdered(food);
@@ -166,14 +166,14 @@ export default function Passenger() {
           <div className="flex flex-col gap-4">
             <div className="w-full flex justify-center text-center bg-white py-16 border-1 border-black">
               {
-                ordered ?
+                ordered.id ?
                   <Fragment>
                     {ordered.category}<br/>{ordered.name}
                   </Fragment> : '주문한 음식이 없습니다.'
               }
             </div>
             {
-              ordered
+              ordered.id
               ? <div className="flex justify-between gap-4">
                   <button 
                     className="w-full bg-white py-2 border-1 border-black"
