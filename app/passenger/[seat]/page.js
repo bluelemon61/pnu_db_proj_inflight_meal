@@ -3,6 +3,8 @@
 import { getAirplainStatus } from "@/apis/passenger/airplain";
 import { getEaten } from "@/apis/passenger/eaten";
 import { getAirplainMenuPassenger } from "@/apis/passenger/menu";
+import { getOrder, postOrder } from "@/apis/passenger/order";
+import { postReview } from "@/apis/passenger/review";
 import { getSleep, postSleep } from "@/apis/passenger/sleep";
 import useInterval from "@/hooks/useInterval";
 import { usePathname } from "next/navigation";
@@ -23,7 +25,7 @@ export default function Passenger() {
     const menuFetcher = async () => {
       const menu = await getAirplainMenuPassenger(flightNumber);
 
-      const newData = foodList;
+      const newData = {...foodList};
 
       menu.forEach((food) => {
         if (newData[food.category] !== undefined) {
@@ -33,7 +35,7 @@ export default function Passenger() {
         }
       });
 
-      setFoodList({...newData});
+      setFoodList(newData);
     }
 
     const sleepFetcher = async () => {
@@ -41,8 +43,15 @@ export default function Passenger() {
       setPassengerState(data[0].sleep_state);
     }
 
+    const orderFetcher = async () => {
+      const data = await getOrder(flightNumber, seatNumber);
+      setOrdered(data);
+      console.log(data);
+    }
+
     menuFetcher();
     sleepFetcher();
+    orderFetcher();
   }, []);
 
   useInterval(() => {
@@ -97,8 +106,10 @@ export default function Passenger() {
                                   return alert('이미 식사를 완료하였습니다.');
                                 if (ordered)
                                   return alert('이미 주문을 완료하였습니다.');
-                                if (confirm(`${food.name} 주문하시겠습니까?\n주문 변경은 불가합니다.`))
+                                if (confirm(`${food.name} 주문하시겠습니까?\n주문 변경은 불가합니다.`)){
                                   setOrdered(food);
+                                  postOrder(flightNumber, food.id, seatNumber);
+                                }
                               }}
                             >
                               <p>{food.name}</p>
@@ -152,7 +163,7 @@ export default function Passenger() {
         <div className="flex flex-col bg-gray-300 p-8 gap-8">
           <h2 className="font-bold text-lg">식사 메뉴 리뷰</h2>
           <div className="flex flex-col gap-4">
-            <div className="w-full flex justify-center bg-white py-16 border-1 border-black">
+            <div className="w-full flex justify-center text-center bg-white py-16 border-1 border-black">
               {
                 ordered ?
                   <Fragment>
@@ -163,10 +174,22 @@ export default function Passenger() {
             {
               ordered
               ? <div className="flex justify-between gap-4">
-                  <button className="w-full bg-white py-2 border-1 border-black">
+                  <button 
+                    className="w-full bg-white py-2 border-1 border-black"
+                    onClick={() => {
+                      postReview(flightNumber, seatNumber, ordered.food_id, true);
+                      alert('좋아요가 반영되었습니다.');
+                    }}
+                  >
                     좋아요 👍
                   </button>
-                  <button className="w-full bg-white py-2 border-1 border-black">
+                  <button 
+                    className="w-full bg-white py-2 border-1 border-black"
+                    onClick={() => {
+                      postReview(flightNumber, seatNumber, ordered.food_id, false);
+                      alert('싫어요가 반영되었습니다.');
+                    }}
+                  >
                     싫어요 👎
                   </button>
                 </div>

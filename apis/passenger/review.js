@@ -4,17 +4,17 @@
  * 권한: 승객(passenger)
  * 
  * @param {number} flight_number 항공기 id
- * @param {number} user_id 승객의 id
+ * @param {number} seat_number 승객의 좌석 번호
  * @param {number} food_order 주문한 음식 id
  * @param {boolean} is_like 종아요 여부 (true or false)
  * @returns 
  */
-export async function postReview(flight_number, user_id, food_order, is_like) {
+export async function postReview(flight_number, seat_number, food_order, is_like) {
   const res = await fetch(`/api/passenger/review`, {
     method: 'POST',
     body: JSON.stringify({
       flight_number,
-      user_id,
+      seat_number,
       food_order,
       is_like,
     }),

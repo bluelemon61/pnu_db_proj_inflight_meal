@@ -11,12 +11,12 @@ import { Client } from "pg";
  */
 export async function POST(request) {
   // flight_number<number>: 항공기 id
-  // user_id<number>: 승객의 id
+  // seat_number<number>: 승객의 좌석 번호
   // food_order<number>: 주문한 음식 id(flight_food)
   // is_like<boolean>: 좋아요 여부, True or False
-  const { flight_number, user_id, food_order, is_like } = await request.json();
+  const { flight_number, seat_number, food_order, is_like } = await request.json();
 
-  if (!flight_number || !user_id || !food_order || is_like === undefined) {
+  if (!flight_number || !seat_number || !food_order || is_like === undefined) {
     return new NextResponse(
       JSON.stringify({ success: false, message: "Invalid input data" }),
       { status: 400 }

@@ -5,16 +5,16 @@
  * 
  * @param {number} flight_number 항공기 id
  * @param {number} food_id 음식 id
- * @param {number} user_id 승객의 id
+ * @param {number} seat_number 승객의 좌석 번호
  * @returns 
  */
-export async function postOrder(flight_number, food_id, user_id) {
+export async function postOrder(flight_number, food_id, seat_number) {
   const res = await fetch(`/api/passenger/order`, {
     method: 'POST',
     body: JSON.stringify({
       flight_number,
       food_id,
-      user_id,
+      seat_number,
     }),
   });
 
@@ -29,12 +29,12 @@ export async function postOrder(flight_number, food_id, user_id) {
  * 권한: 승객(passenger)
  * 
  * @param {number} flight_number 항공기 id
- * @param {number} user_id 승객의 id
+ * @param {number} seat_number 좌석 번호
  * @returns 
  */
-export async function getOrder(flight_number, user_id) {
+export async function getOrder(flight_number, seat_number) {
   const queryParameters = new URLSearchParams({
-    flight_number, user_id
+    flight_number, seat_number
   }).toString();
 
   const res = await fetch(`/api/passenger/order?${queryParameters}`, {
@@ -43,16 +43,5 @@ export async function getOrder(flight_number, user_id) {
 
   const data = await res.json();
 
-  if (!data) {
-    return {
-      user_id: 2,
-      food_order: 1,
-      category: '양식',
-      name: '함박 스테이크',
-      like_count: 4,
-      hate_count: 6,
-    }
-  }
-
-  return data;
+  return data.data;
 }
