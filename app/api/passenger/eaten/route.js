@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Client } from "pg";
 
 /**
- * 기내식 목록을 불러온다. (승객용)
+ * 본인의 식사 상태를 불러온다. (승객용)
  * 
  * 권한: 승객(passenger)
  * 
@@ -13,7 +13,9 @@ export async function GET(request){
   const searchParams = request.nextUrl.searchParams;
   
   // flight_number<number>: 항공기 id
+  // seat_number<number>: 승객의 좌석 번호
   const flight_number = parseInt(searchParams.get('flight_number'));
+  const seat_number = parseInt(searchParams.get('seat_number'));
 
   const client = new Client({
     user: process.env.DB_USER,
@@ -26,16 +28,12 @@ export async function GET(request){
   await client.connect();
     const query = `
       SELECT 
-        ff.id,
-        ff.food_id,
-        f.category,
-        f.name,
-        f.like_count,
-        f.hate_count
-      FROM flight_food ff JOIN food f ON ff.food_id = f.id
-      WHERE ff.food_target = '승객' AND ff.flight_number = $1;
+        fu.user_id,
+        fu.eat_count
+      FROM flight_user fu
+      WHERE fu.flight_number = $1 AND fu.seat_number = $2;
     `;
-  const result = await client.query(query, [flight_number]);
+  const result = await client.query(query, [flight_number, seat_number]);
   await client.end();
 
   return new NextResponse(JSON.stringify(result.rows), {

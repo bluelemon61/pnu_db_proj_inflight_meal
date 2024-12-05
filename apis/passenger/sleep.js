@@ -4,23 +4,22 @@
  * 권한: 승객(passenger)
  * 
  * @param {number} flight_number 항공기 id
- * @param {number} user_id 승객의 id
+ * @param {number} seat_number 승객의 좌석번호
  * @param {string} sleep_state NORMAL, DONOTTOUCH (수면 중, 깨우지 마세요), AWAKEME (수면 중, 깨워주세요)
  * @returns 
  */
-export async function postSleep(flight_number, user_id, sleep_state) {
+export async function postSleep(flight_number, seat_number, sleep_state) {
   const res = await fetch(`/api/passenger/sleep`, {
     method: 'POST',
     body: JSON.stringify({
       flight_number,
-      user_id,
+      seat_number,
       sleep_state,
     }),
   });
 
-  const data = await res.json();
-
-  return data;
+  if (res.status < 300) return true;
+  return false;
 }
 
 /**
@@ -29,12 +28,12 @@ export async function postSleep(flight_number, user_id, sleep_state) {
  * 권한: 승객(passenger)
  * 
  * @param {number} flight_number 항공기 id
- * @param {number} user_id 승객의 id
+ * @param {number} seat_number 승객의 좌석번호
  * @returns 
  */
-export async function getSleep(flight_number, user_id) {
+export async function getSleep(flight_number, seat_number) {
   const queryParameters = new URLSearchParams({
-    flight_number, user_id
+    flight_number, seat_number
   }).toString();
 
   const res = await fetch(`/api/passenger/sleep?${queryParameters}`, {
@@ -42,13 +41,6 @@ export async function getSleep(flight_number, user_id) {
   });
 
   const data = await res.json();
-
-  if (!data) {
-    return {
-      user_id: 2,
-      sleep_state: 'NORMAL',
-    };
-  }
 
   return data;
 }

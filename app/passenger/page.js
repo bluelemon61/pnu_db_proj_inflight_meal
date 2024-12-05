@@ -1,84 +1,44 @@
-"use client"
+"use client";
 
-import { Fragment, useState } from "react"
+import Link from "next/link";
+import { Fragment, useState } from "react";
 
-export default function Passenger() {
-  const [samples, setSamples] = useState([
-    '함박스테이크',
-    '닭가슴살 샐러드',
-    '연어 포케',
-    '김치 볶음밥',
-    '제육 볶음',
-    '영양 불고기',
-  ]);
-  
-  const [categories, setCategories] = useState([
-    '양식', '샌드위치', '덮밥', '포케',
-  ]);
+export default function SeatSelect() {
+  const [rows, setRows] = useState(5);
+  const [cols, setCols] = useState(4);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 w-crew">
       <div className="flex flex-col gap-4">
-        <h1 className="font-black text-2xl">기내식</h1>
-        <div className="flex flex-col bg-gray-300 p-8 gap-8">
-          <h2 className="font-bold text-lg">주문</h2>
-          <div className="flex flex-col gap-2 h-[520px] overflow-y-scroll">
-            {
-              categories.map((category, idx) => {
-                return (
-                  <Fragment key={`${category}-${idx}`}>           
-                    <h2 className="font-bold">{category}</h2>
-                    <div className="grid grid-cols-4 gap-4">
-                      {
-                        samples.map((food, i) => {
-                          return (
-                            <button key={`${food}-${i}`} className="py-4 bg-white border-1 border-black">
-                              <p>{food}</p>
-                              <p>👍+5 👎-2</p>
-                            </button>
-                          )
-                        })
-                      }
-                    </div>
-                  </Fragment>
-                )
-              }) 
-            }
+        <h1 className="font-black text-2xl">좌석선택</h1>
+        <div className="relative flex flex-col items-center">
+          <div className="px-8 py-24 bg-gray-200" />
+          <div className="flex gap-12 bg-gray-200 px-36 py-16 rounded-airplain">
+            {Array.from({ length: rows }).map((_, r) => (
+              <Fragment key={r}>
+                {r === Math.ceil(rows / 2) ? <div className="px-8" /> : null}
+                <div className="flex flex-col gap-4">
+                  {Array.from({ length: cols }).map((_, c) => (
+                    <Fragment key={`col${c}`}>
+                      {c === cols / 2? <div className="py-4" /> : null}
+                      <Link
+                        className={`p-6 bg-gray-400 hover:bg-gray-100`}
+                        href={`/passenger/${r*cols + c + 1}`}
+                      >
+                        {r*cols + c + 1}
+                      </Link>                        
+                    </Fragment>
+                  ))}
+                </div>
+              </Fragment>
+            ))}
           </div>
-          <div className="flex justify-between items-end">
-            <div className="flex gap-4">
-              <p>식사 전</p>
-              <p>비행기 상태 - 이륙 중</p>
-              <p>기내식 이용 불가</p>
-            </div>
-            <div className="flex justify-end gap-4">
-              <button className="bg-white w-40 py-2 border-1 border-black">
-                깨우지 마세요
-              </button>
-              <button className="bg-white w-40 py-2 border-1 border-black">
-                기내식 때<br/>깨워주세요
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col bg-gray-300 p-8 gap-8">
-          <h2 className="font-bold text-lg">식사 메뉴 리뷰</h2>
-          <div className="flex flex-col gap-4">
-            <button className="w-full bg-white py-16 border-1 border-black">
-              양식 <br/>
-              함박 스테이크
-            </button>
-            <div className="flex justify-between gap-4">
-              <button className="w-full bg-white py-2 border-1 border-black">
-                좋아요 👍
-              </button>
-              <button className="w-full bg-white py-2 border-1 border-black">
-                싫어요 👎
-              </button>
-            </div>
+          <div className="px-8 py-24 bg-gray-200" />
+          <div className="absolute w-full flex justify-center bg-white/50 border-2 p-8 left-0 bottom-0 gap-4 text-lg">
+            착석할 좌석을 선택해 주세요
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
