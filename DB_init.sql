@@ -30,7 +30,7 @@ CREATE TABLE flight_user (
   id SERIAL PRIMARY KEY,
   flight_number INT REFERENCES flight (flight_number) ON DELETE CASCADE ON UPDATE CASCADE,
   user_id INT REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
-  sleep_state VARCHAR(8) NOT NULL, -- NORMAL, DONOTTOUCH (수면 중, 깨우지 마세요), AWAKEME (수면 중, 깨워주세요)
+  sleep_state VARCHAR(8) NOT NULL, -- NORMAL, NOTTOUCH (수면 중, 깨우지 마세요), AWAKEME (수면 중, 깨워주세요)
   eat_count INT NOT NULL, -- 해당 항공 운항 중 기내식을 먹은 횟수
   seat_number INT NOT NULL,
   food_order INT REFERENCES flight_food (id) ON DELETE CASCADE ON UPDATE CASCADE

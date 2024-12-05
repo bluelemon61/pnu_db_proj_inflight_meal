@@ -17,30 +17,7 @@ export async function getSleepStatus(flight_number) {
 
   const data = await res.json();
 
-  if (!data) {
-    return [
-      {
-        user_id: 1,
-        eat_count: 0,
-        sleep_state: 'NORMAL',
-      },
-      {
-        user_id: 2,
-        eat_count: 1,
-        sleep_state: 'DONOTTOUCH',
-      },
-      {
-        user_id: 3,
-        eat_count: 1,
-        sleep_state: 'DONOTTOUCH',
-      },
-      {
-        user_id: 4,
-        eat_count: 0,
-        sleep_state: 'AWAKEME',
-      },
-    ]
-  }
+  console.log(data);
 
   return data;
 }

@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server";
 import { Client } from "pg";
 
-export async function POST(request) {
+/**
+ * 수면 상태를 설정한다.
+ * 
+ * 권한: 승객(passenger)
+ * 
+ * @param {*} request 
+ * @returns 
+ */
+export async function POST(request){
   // flight_number<number>: 항공기 id
-  // user_id<number>: 승객의 id
-  // sleep_state<string>: NORMAL, DONOTTOUCH, AWAKEME, EATING
-  const { flight_number, user_id, sleep_state } = await request.json();
-
-  if (!flight_number || !user_id || !sleep_state) {
-    return new NextResponse(
-      JSON.stringify({ success: false, message: "Invalid input data" }),
-      { status: 400 }
-    );
-  }
+  // seat_number<number>: 승객의 좌석번호
+  // sleep_state<string>: NORMAL, DONOTTOUCH (수면 중, 깨우지 마세요), AWAKEME (수면 중, 깨워주세요)
+  const {flight_number, seat_number, sleep_state} = await request.json();
 
   const client = new Client({
     user: process.env.DB_USER,
@@ -22,41 +23,59 @@ export async function POST(request) {
     port: process.env.DB_PORT,
   });
 
-  try {
-    await client.connect();
-
+  await client.connect();
     const query = `
-      UPDATE passenger_states
-      SET sleep_state = $3
-      WHERE flight_number = $1 AND user_id = $2
+      UPDATE 
+        flight_user
+      SET
+        sleep_state = $3
+      WHERE
+        flight_number = $1 AND seat_number = $2;
     `;
-    const result = await client.query(query, [
-      flight_number,
-      user_id,
-      sleep_state,
-    ]);
+  const result = await client.query(query, [flight_number, seat_number, sleep_state]);
+  await client.end();
 
-    await client.end();
+  return new NextResponse(null, {
+    status: 200,
+  });
+}
 
-    if (result.rowCount === 0) {
-      return new NextResponse(
-        JSON.stringify({
-          success: false,
-          message: "No matching record found to update",
-        }),
-        { status: 404 }
-      );
-    }
+/**
+ * 본인의 수면 상태를 불러온다. (승객용)
+ * 
+ * 권한: 승객(passenger)
+ * 
+ * @param {*} request 
+ * @returns 
+ */
+export async function GET(request){
+  const searchParams = request.nextUrl.searchParams;
+  
+  // flight_number<number>: 항공기 id
+  // seat_number<number>: 승객의 좌석번호
+  const flight_number = parseInt(searchParams.get('flight_number'));
+  const seat_number = parseInt(searchParams.get('seat_number'));
 
-    return new NextResponse(
-      JSON.stringify({ success: true, message: "State updated successfully" }),
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error updating state:", error);
-    return new NextResponse(
-      JSON.stringify({ success: false, message: "Failed to update state" }),
-      { status: 500 }
-    );
-  }
+  const client = new Client({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+  });
+
+  await client.connect();
+    const query = `
+      SELECT 
+        fu.user_id,
+        fu.sleep_state
+      FROM flight_user fu
+      WHERE fu.flight_number = $1 AND fu.seat_number = $2;
+    `;
+  const result = await client.query(query, [flight_number, seat_number]);
+  await client.end();
+
+  return new NextResponse(JSON.stringify(result.rows), {
+    status: 200,
+  });
 }

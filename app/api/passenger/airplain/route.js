@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { Client } from "pg";
 
 /**
- * 승객들의 식사 상태를 확인한다.
+ * 비행기 상태를 불러온다. (승객용)
  * 
- * 권한: 승무원(crew)
+ * 권한: 승객(passenger)
  * 
  * @param {*} request 
  * @returns 
@@ -26,13 +26,10 @@ export async function GET(request){
   await client.connect();
     const query = `
       SELECT 
-        fu.id,
-        fu.user_id,
-        fu.eat_count,
-        fu.seat_number,
-        fu.food_order
-      FROM flight_user fu
-      WHERE fu.seat_number > 0 AND fu.flight_number = $1
+        f.flight_state,
+        f.serve
+      FROM flight f
+      WHERE f.flight_number = $1;
     `;
   const result = await client.query(query, [flight_number]);
   await client.end();

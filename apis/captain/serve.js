@@ -16,7 +16,6 @@ export async function postAirplainServe(flight_number, serve) {
     }),
   });
 
-  const data = await res.json();
-
-  return data;
+  if (res.status < 300) return true;
+  return false;
 }

@@ -1,32 +1,33 @@
 "use client";
 
+import { postAirplainStatus } from "@/apis/captain/airplain";
+import { getAirplainMenu } from "@/apis/captain/menu";
+import { postAirplainServe } from "@/apis/captain/serve";
+import { postAirplainMenu } from "@/apis/crew/menu";
+import { getAirplainStatus } from "@/apis/crew/status";
 import { useState, useEffect } from "react";
 
 export default function Captain() {
   const [flightFood, setFlightFood] = useState([]); // 기내식 데이터 상태 관리
+  const [captainFood, setCaptainFood] = useState([]); // 기내식 데이터 상태 관리
   const [mealService, setMealService] = useState(false); // 기내식 제공 상태 관리
+  const [flightState, setFlightState] = useState('착륙'); // 비행기 상태 관리
+  const flightStateArr = ['이륙', '정상운행', '난기류', '비상상황', '착륙'];
   const [loading, setLoading] = useState(false); // 로딩 상태
+
+  const [flightNumber, setFlightNumber] = useState(100);
+  const [captainId, setCaptainId] = useState(1);
 
   // 비행 상태 업데이트 함수
   async function updateFlightState(state) {
     try {
-      const response = await fetch("/api/captain/airplain", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          flight_number: 100, // 업데이트할 비행기의 번호
-          flight_state: state, // 업데이트할 상태
-        }),
-      });
+      const result = await postAirplainStatus(flightNumber, state)
 
-      const result = await response.json();
-
-      if (result.success) {
+      if (result) {
         alert(`비행 상태가 '${state}'로 업데이트되었습니다.`);
+        setFlightState(state);
       } else {
-        alert(`업데이트 실패: ${result.message}`);
+        alert(`업데이트 실패`);
       }
     } catch (error) {
       console.error("Error updating flight state:", error);
@@ -37,8 +38,7 @@ export default function Captain() {
   // 기내식 데이터 가져오는 함수
   async function fetchFlightFood() {
     try {
-      const response = await fetch("/api/captain/menu?flight_number=100"); // API 호출
-      const data = await response.json();
+      const data = await getAirplainMenu(flightNumber, null);
       setFlightFood(data); // 상태 업데이트
       console.log("Fetched flight food:", data); // 확인용 로그
     } catch (error) {
@@ -46,42 +46,39 @@ export default function Captain() {
     }
   }
 
-  // 기내식 제공 상태 가져오는 함수
-  async function fetchMealServiceStatus() {
-    try {
-      const response = await fetch(`/api/captain/serve?flight_number=100`);
-      const result = await response.json();
-
-      if (result.success) {
-        setMealService(result.serve);
+    // 기장 기내식 데이터 가져오는 함수
+    async function fetchCaptainFood() {
+      try {
+        const data = await getAirplainMenu(flightNumber, '기장');
+        setCaptainFood(data); // 상태 업데이트
+        console.log("Fetched flight food:", data); // 확인용 로그
+      } catch (error) {
+        console.error("Error fetching flight food data:", error);
       }
+    }
+
+  // 비행기 상태 가져오는 함수
+  async function fetchFlightStatus() {
+    try {
+      const data = await getAirplainStatus(flightNumber);
+      setFlightState(data.flight_state); // 상태 업데이트
     } catch (error) {
-      console.error("Error fetching meal service status:", error);
+      console.error("Error fetching flight food data:", error);
     }
   }
+
 
   // 기내식 제공 상태 업데이트 함수
   async function updateMealServiceStatus(status) {
     try {
       setLoading(true); // 로딩 상태 활성화
-      const response = await fetch("/api/captain/serve", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          flight_number: 100,
-          serve: status,
-        }),
-      });
+      const success = await postAirplainServe(flightNumber, status)
 
-      const result = await response.json();
-
-      if (result.success) {
+      if (success) {
         setMealService(status); // 상태 업데이트
         alert(`기내식 제공이 ${status ? "시작" : "중단"}되었습니다.`);
       } else {
-        alert(`업데이트 실패: ${result.message}`);
+        alert(`업데이트 실패`);
       }
     } catch (error) {
       console.error("Error updating meal service status:", error);
@@ -94,7 +91,8 @@ export default function Captain() {
   // 컴포넌트가 마운트될 때 데이터 가져오기
   useEffect(() => {
     fetchFlightFood();
-    fetchMealServiceStatus();
+    fetchCaptainFood();
+    fetchFlightStatus();
   }, []);
 
   return (
@@ -103,36 +101,19 @@ export default function Captain() {
       <div className="flex flex-col gap-4">
         <h1 className="font-black text-2xl">비행기 상태</h1>
         <div className="flex gap-8">
-          <button
-            className="w-full py-12 bg-gray-300"
-            onClick={() => updateFlightState("이륙")}
-          >
-            이륙
-          </button>
-          <button
-            className="w-full py-12 bg-gray-300"
-            onClick={() => updateFlightState("정상운행")}
-          >
-            정상 운행
-          </button>
-          <button
-            className="w-full py-12 bg-gray-300"
-            onClick={() => updateFlightState("난기류")}
-          >
-            난기류
-          </button>
-          <button
-            className="w-full py-12 bg-gray-300"
-            onClick={() => updateFlightState("비상상황")}
-          >
-            비상 상황
-          </button>
-          <button
-            className="w-full py-12 bg-gray-300"
-            onClick={() => updateFlightState("착륙")}
-          >
-            착륙
-          </button>
+          {
+            flightStateArr.map((fState) => {
+              return (
+                <button
+                  className={`w-full py-12 ${fState === flightState ? 'bg-green-400' : 'bg-gray-300'}`}
+                  key={`flight-${fState}`}
+                  onClick={() => updateFlightState(fState)}
+                >
+                  {fState}
+                </button>
+              );
+            })
+          }
         </div>
       </div>
 
@@ -143,14 +124,14 @@ export default function Captain() {
           <h2 className="font-bold text-lg">기내식 제공 시간</h2>
           <div className="flex gap-8">
             <button
-              className={`w-full py-12 ${mealService ? "bg-gray-400" : "bg-gray-100"}`}
+              className={`w-full py-12 ${mealService ? "bg-green-400" : "bg-gray-400"}`}
               onClick={() => updateMealServiceStatus(true)}
               disabled={loading || mealService}
             >
               ON
             </button>
             <button
-              className={`w-full py-12 ${!mealService ? "bg-gray-400" : "bg-gray-100"}`}
+              className={`w-full py-12 ${!mealService ? "bg-green-400" : "bg-gray-400"}`}
               onClick={() => updateMealServiceStatus(false)}
               disabled={loading || !mealService}
             >
@@ -189,6 +170,39 @@ export default function Captain() {
               <div className="text-center py-4">데이터가 없습니다.</div>
             )}
           </div>
+        </div>
+        <div className="flex flex-col bg-gray-300 p-8">
+          <h2 className="font-bold text-lg">기장 기내식 선택</h2>
+          {/* 테이블 헤더 */}
+          <div className="flex gap-4 justify-between py-2 border-b-2 border-black">
+            <div className="w-1/6 text-center">음식 명</div>
+            <div className="w-1/6 text-center">분류</div>
+            <div className="w-1/6 text-center">재고</div>
+            <div className="w-1/6 text-center">👍</div>
+            <div className="w-1/6 text-center">👎</div>
+            <div className="w-1/6 text-center">제공 대상</div>
+          </div>
+          {/* 데이터 출력 */}
+          {captainFood.length > 0 ? (
+            captainFood.map((food) => (
+              <div
+                key={food.food_id}
+                className="flex gap-4 justify-between py-2 border-b-1 border-black hover:bg-gray-100 hover:cursor-pointer"
+                onClick={() => {
+                  postAirplainMenu(flightNumber, food.food_id, captainId);
+                }}
+              >
+                <div className="w-1/6 text-center">{food.food_name}</div>
+                <div className="w-1/6 text-center">{food.category}</div>
+                <div className="w-1/6 text-center">{food.food_count}</div>
+                <div className="w-1/6 text-center">{food.like_count}</div>
+                <div className="w-1/6 text-center">{food.hate_count}</div>
+                <div className="w-1/6 text-center">{food.food_target}</div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-4">데이터가 없습니다.</div>
+          )}
         </div>
       </div>
     </div>

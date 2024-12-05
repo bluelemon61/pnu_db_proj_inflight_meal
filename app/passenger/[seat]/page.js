@@ -4,7 +4,6 @@ import { getAirplainStatus } from "@/apis/passenger/airplain";
 import { getEaten } from "@/apis/passenger/eaten";
 import { getAirplainMenuPassenger } from "@/apis/passenger/menu";
 import { getSleep, postSleep } from "@/apis/passenger/sleep";
-import { getReview, postReview}  from "@/apis/passenger/review"; 
 import useInterval from "@/hooks/useInterval";
 import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useState } from "react"
@@ -19,7 +18,6 @@ export default function Passenger() {
   const [ordered, setOrdered] = useState(null);
   const [airplainStatus, setAirPlainStatus] = useState(null);
   const [eaten, setEaten] = useState(0);
-  
 
   useEffect(() => {
     const menuFetcher = async () => {
@@ -62,51 +60,6 @@ export default function Passenger() {
     eatenFetcher();
   }, 3000);
 
-  const handleLike = async () => {
-    if (!ordered) {
-      return alert("주문한 음식이 없습니다.");
-    }
-  
-    try {
-      // 좋아요 요청 전송
-      const response = await postReview(flightNumber, seatNumber, ordered.id, true);
-  
-      if (response.success) {
-        alert("좋아요가 반영되었습니다.");
-        // 업데이트된 리뷰 데이터를 가져옵니다.
-        const updatedReview = await getReview(flightNumber, seatNumber, ordered.id);
-        setOrdered({ ...ordered, like_count: updatedReview.data.like_count });
-      } else {
-        alert("좋아요 반영에 실패했습니다.");
-      }
-    } catch (error) {
-      console.error("좋아요 처리 중 오류:", error);
-      alert("좋아요 처리 중 오류가 발생했습니다.");
-    }
-  };
-  
-  const handleDislike = async () => {
-    if (!ordered) {
-      return alert("주문한 음식이 없습니다.");
-    }
-  
-    try {
-      // 싫어요 요청 전송
-      const response = await postReview(flightNumber, seatNumber, ordered.id, false);
-  
-      if (response.success) {
-        alert("싫어요가 반영되었습니다.");
-        // 업데이트된 리뷰 데이터를 가져옵니다.
-        const updatedReview = await getReview(flightNumber, seatNumber, ordered.id);
-        setOrdered({ ...ordered, hate_count: updatedReview.data.hate_count });
-      } else {
-        alert("싫어요 반영에 실패했습니다.");
-      }
-    } catch (error) {
-      console.error("싫어요 처리 중 오류:", error);
-      alert("싫어요 처리 중 오류가 발생했습니다.");
-    }
-  };
   useEffect(() => {
     const sleepHandler = async () => {
       const data = await getSleep(flightNumber, seatNumber);
@@ -210,10 +163,10 @@ export default function Passenger() {
             {
               ordered
               ? <div className="flex justify-between gap-4">
-                  <button className="w-full bg-white py-2 border-1 border-black" onClick={handleLike}>
+                  <button className="w-full bg-white py-2 border-1 border-black">
                     좋아요 👍
                   </button>
-                  <button className="w-full bg-white py-2 border-1 border-black" onClick={handleDislike}>
+                  <button className="w-full bg-white py-2 border-1 border-black">
                     싫어요 👎
                   </button>
                 </div>
