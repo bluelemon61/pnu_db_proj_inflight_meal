@@ -20,9 +20,8 @@ export async function postMenu(user_id, category, name, count) {
     }),
   });
 
-  const data = await res.json();
-
-  return data;
+  if (res.status < 300) return true;
+  return false;
 }
 
 /**
@@ -44,26 +43,7 @@ export async function getMenu(user_id) {
 
   const data = await res.json();
 
-  if (!data) {
-    return [
-      {
-        id: 1,
-        category: '양식',
-        name: '함박 스테이크',
-        like_count: 4,
-        hate_count: 6,
-      },
-      {
-        id: 2,
-        category: '샌드위치',
-        name: '베이컨 햄 에그 샌드위치',
-        like_count: 7,
-        hate_count: 3,
-      }
-    ]
-  }
-
-  return data;
+  return data.data;
 }
 
 /**
