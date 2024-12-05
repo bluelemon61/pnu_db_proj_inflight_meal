@@ -6,6 +6,7 @@ import { getAirplainMenuPassenger } from "@/apis/passenger/menu";
 import { getOrder, postOrder } from "@/apis/passenger/order";
 import { postReview } from "@/apis/passenger/review";
 import { getSleep, postSleep } from "@/apis/passenger/sleep";
+import interval from "@/constants/interval";
 import useInterval from "@/hooks/useInterval";
 import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useState } from "react"
@@ -67,7 +68,7 @@ export default function Passenger() {
 
     airplainFetcher();
     eatenFetcher();
-  }, 3000);
+  }, interval);
 
   useEffect(() => {
     const sleepHandler = async () => {

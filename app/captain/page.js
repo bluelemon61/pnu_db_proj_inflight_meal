@@ -5,6 +5,7 @@ import { getAirplainMenu, putAirplainMenu } from "@/apis/captain/menu";
 import { postAirplainServe } from "@/apis/captain/serve";
 import { postAirplainMenu } from "@/apis/crew/menu";
 import { getAirplainStatus } from "@/apis/crew/status";
+import interval from "@/constants/interval";
 import useInterval from "@/hooks/useInterval";
 import { useState } from "react";
 
@@ -91,7 +92,7 @@ export default function Captain() {
     fetchFlightFood();
     fetchCaptainFood();
     fetchFlightStatus();
-  }, 3000);
+  }, interval);
 
   return (
     <div className="flex flex-col gap-8">

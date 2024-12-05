@@ -4,6 +4,7 @@ import { getEatStatus } from "@/apis/crew/eat-check";
 import { getAirplainMenu, postAirplainMenu } from "@/apis/crew/menu";
 import { getSleepStatus } from "@/apis/crew/sleep-check";
 import { getAirplainStatus } from "@/apis/crew/status";
+import interval from "@/constants/interval";
 import useInterval from "@/hooks/useInterval";
 import { Fragment, useState } from "react";
 
@@ -54,7 +55,7 @@ export default function Crew() {
     flightGetter();
     menuGetter();
     passGetter();
-  }, 3000);
+  }, interval);
 
   return (
     <div className="flex flex-col gap-8 w-crew">

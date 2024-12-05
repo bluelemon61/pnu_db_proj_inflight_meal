@@ -1,6 +1,7 @@
 "use client"
 
 import { getAirplainStatus } from "@/apis/passenger/airplain";
+import interval from "@/constants/interval";
 import useInterval from "@/hooks/useInterval";
 import { useState } from "react";
 
@@ -16,7 +17,7 @@ export default function AirplainStateBox() {
     }
 
     stateFetcher();
-  }, 3000);
+  }, interval);
   
   return (
     <div className="relative p-12 w-full flex flex-col gap-2">
