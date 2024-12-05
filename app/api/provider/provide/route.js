@@ -38,6 +38,21 @@ export async function POST(request) {
     );
   }
 
+  const duplicateQuery = `
+    SELECT *
+    FROM flight_food
+    WHERE flight_number = $1 AND food_id = $2;
+  `
+  const duplicateResult = await client.query(duplicateQuery, [flight_number, id]);
+  if (duplicateResult.rows.length) {
+    await client.query('ROLLBACK');
+    client.release();
+    return new NextResponse(
+      JSON.stringify({ success: false, message: "중복 기내식 존재" }),
+      { status: 400 }
+    );
+  }
+
   // flight_food에 데이터를 삽입하는 쿼리
   const query = `
     INSERT INTO flight_food (flight_number, food_id, food_count, food_target)

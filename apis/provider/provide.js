@@ -22,7 +22,10 @@ export async function postMenuOfFlight(user_id, flight_number, id, food_count) {
 
   if (res.status < 300) return true;
   
-  alert(`비행기가 '착륙' 상태일 때만 수정 및 삭제가 가능합니다.`);
+  const result = await res.json();
+
+  if (result.message.includes('중복')) alert(`비행기에 중복된 기내식이 존재합니다.`);
+  else alert(`비행기가 '착륙' 상태일 때만 수정 및 삭제가 가능합니다.`);
   return false;
 }
 
