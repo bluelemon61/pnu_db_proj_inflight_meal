@@ -20,9 +20,8 @@ export async function postMenuOfFlight(user_id, flight_number, food_id, count) {
     }),
   });
 
-  const data = await res.json();
-
-  return data;
+  if (res.status < 300) return true;
+  return false;
 }
 
 /**
@@ -43,9 +42,7 @@ export async function getMenuOfFlight(user_id, flight_number) {
     method: 'GET',
   });
 
-  const data = await res.json();
-
-  if (!data) {
+  if ((await res.text()).length < 1) {
     return [
       {
         id: 1,
@@ -62,6 +59,7 @@ export async function getMenuOfFlight(user_id, flight_number) {
     ]
   }
 
+  const data = await res.json();
   return data;
 }
 
@@ -87,9 +85,8 @@ export async function putMenuOfFlight(user_id, flight_number, food_id, count) {
     }),
   });
 
-  const data = await res.json();
-
-  return data;
+  if (res.status < 300) return true;
+  return false;
 }
 
 /**
@@ -112,7 +109,6 @@ export async function deleteMenuOfFlight(user_id, flight_number, food_id) {
     }),
   });
 
-  const data = await res.json();
-
-  return data;
+  if (res.status < 300) return true;
+  return false;
 }

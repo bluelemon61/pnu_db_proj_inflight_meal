@@ -1,6 +1,7 @@
 "use client"
 
 import { getMenu, postMenu } from "@/apis/provider/menu";
+import { deleteMenuOfFlight, getMenuOfFlight, postMenuOfFlight, putMenuOfFlight } from "@/apis/provider/provide";
 import interval from "@/constants/interval";
 import useInterval from "@/hooks/useInterval";
 import { useState } from "react"
@@ -15,13 +16,22 @@ export default function Provider() {
     category: '',
   });
 
+  const [flightList, setFlightList] = useState([]);
+  const [newCounts, setNewCounts] = useState([]);
+
   useInterval(() => {
     const provideListFetcher = async () => {
       const data = await getMenu(providerId);
       setProvideList(data);
     }
 
+    const flightListFetcher = async () => {
+      const data = await getMenuOfFlight(providerId, flightNumber);
+      setFlightList(data);
+    }
+
     provideListFetcher();
+    flightListFetcher();
   }, interval);
 
   return (
@@ -40,7 +50,14 @@ export default function Provider() {
             {
               provideList.map((food) => {
                 return (
-                  <div className="flex gap-4 justify-between py-2 border-b-1 border-black" key={`food-${food.id}`}>
+                  <div 
+                    className="flex gap-4 justify-between py-2 border-b-1 border-black hover:bg-white hover:cursor-pointer"
+                    key={`food-${food.id}`}
+                    onClick={async () => {
+                      const result = await postMenuOfFlight(providerId, flightNumber, food.id, 0);
+                      if (result) alert('성공적으로 추가되었습니다.');
+                    }}
+                  >
                     <div className="w-1/4 text-center">{food.name}</div>
                     <div className="w-1/4 text-center">{food.category}</div>
                     <div className="w-1/4 text-center">{food.like_count}</div>
@@ -103,6 +120,9 @@ export default function Provider() {
                 </button>
               </div>
             </div>
+            <div className="p-4 self-center text-center text-lg">
+              ⬇️ 음식 클릭 시 비행기에 기내식이 추가됩니다. ⬇️
+            </div>
           </div>
         </div>
       </div>
@@ -116,31 +136,49 @@ export default function Provider() {
               <div className="w-1/4 text-center">분류</div>
               <div className="w-1/4 text-center">재고</div>
               <div className="w-1/4 text-center">재고 변경</div>
+              <div className="w-1/4 text-center">삭제</div>
             </div>
-            <div className="flex gap-4 justify-between py-2 border-b-1 border-black">
-              <div className="w-1/4 text-center">닭다리살 포케</div>
-              <div className="w-1/4 text-center">포케</div>
-              <div className="w-1/4 text-center">10</div>
-              <div className="w-1/4 text-center flex justify-center gap-2">
-                <input type="number" className="w-20 text-right"/>
-                <button className="bg-blue-300 py-1 px-4">반영</button>
-              </div>
-            </div>
-            <div className="flex gap-4 justify-between py-2 border-b-1 border-black">
-              <div className="w-1/4 text-center">
-                <input />
-              </div>
-              <div className="w-1/4 text-center">
-                <input />
-              </div>
-              <div className="w-1/4 text-center">
-                <input type="number"/>
-              </div>
-              <div className="w-1/4 text-center flex justify-center gap-2">
-                <button className="bg-red-300 py-1 px-4">초기화</button>
-                <button className="bg-green-300 py-1 px-4">추가</button>
-              </div>
-            </div>
+            {
+              flightList.map((food, idx) => {
+                return (
+                  <div className="flex gap-4 justify-between py-2 border-b-1 border-black" key={`flightFood-${food.id}`}>
+                    <div className="w-1/4 text-center">{food.name}</div>
+                    <div className="w-1/4 text-center">{food.category}</div>
+                    <div className="w-1/4 text-center">{food.count}</div>
+                    <div className="w-1/4 text-center flex justify-center gap-2">
+                      <input 
+                        type="number" 
+                        className="w-20 text-right"
+                        id={`count-${food.id}`}
+                      />
+                      <button 
+                        className="bg-blue-300 py-1 px-4"
+                        onClick={async () => {
+                          const count = parseInt(document.getElementById(`count-${food.id}`).value);
+                          if (!isNaN(count)){
+                            const result = await putMenuOfFlight(providerId, flightNumber, food.id, count);
+                            if (result) alert('재고 변경이 반영되었습니다.');
+                          }
+                        }}
+                      >
+                        반영
+                      </button>
+                    </div>
+                    <div className="w-1/4 text-center">
+                      <button
+                        className="bg-red-500 py-1 px-4 text-white"
+                        onClick={async () => {
+                          const result = await deleteMenuOfFlight(providerId, flightNumber, food.id);
+                          if (result) alert('비행기 재고에서 삭제되었습니다.');
+                        }}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </div>
+                )
+              })
+            }
           </div>
         </div>
       </div>
