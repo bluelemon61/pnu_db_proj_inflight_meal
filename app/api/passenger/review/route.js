@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Client } from "pg";
+import { Client, Pool } from "pg";
 
 /**
  * 식사한 음식에 대한 리뷰를 작성한다.
@@ -10,12 +10,10 @@ import { Client } from "pg";
  * @returns 
  */
 export async function POST(request) {
-  // flight_number<number>: 항공기 id
-  // seat_number<number>: 승객의 좌석 번호
-  // food_order<number>: 주문한 음식 id(flight_food)
-  // is_like<boolean>: 좋아요 여부, True or False
+  // 요청 데이터 추출
   const { flight_number, seat_number, food_order, is_like } = await request.json();
 
+  // 필수 데이터 검증
   if (!flight_number || !seat_number || !food_order || is_like === undefined) {
     return new NextResponse(
       JSON.stringify({ success: false, message: "Invalid input data" }),
@@ -23,7 +21,7 @@ export async function POST(request) {
     );
   }
 
-  const client = new Client({
+  const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
@@ -31,28 +29,74 @@ export async function POST(request) {
     port: process.env.DB_PORT,
   });
 
-  try {
-    await client.connect();
+  const client = await pool.connect();
 
-    // 좋아요/싫어요 카운트를 업데이트
+  try {
+    // 트랜잭션 시작
+    await client.query('BEGIN');
+
+    // `flight_user`의 `is_reviewed` 상태 확인
+    const checkQuery = `
+      SELECT *
+      FROM flight_user
+      WHERE flight_number = $1
+        AND seat_number = $2
+        AND food_order = $3
+        AND is_reviewed = FALSE;
+    `;
+    const checkResult = await client.query(checkQuery, [flight_number, seat_number, food_order]);
+
+    if (checkResult.rows.length === 0) {
+      // 조건 만족하지 않을 경우 롤백
+      await client.query('ROLLBACK');
+      client.release();
+      return new NextResponse(
+        JSON.stringify({ success: false, message: "Review already submitted or invalid data." }),
+        { status: 400 }
+      );
+    }
+
+    // 좋아요/싫어요 카운트 업데이트
     const column = is_like ? "like_count" : "hate_count";
-    const query = `
+    const updateQuery = `
       UPDATE food
       SET ${column} = ${column} + 1
-      WHERE id = $1
+      WHERE id = (
+        SELECT food_id
+        FROM flight_food
+        WHERE id = $1
+      );
+`;
+await client.query(updateQuery, [food_order]);
+
+
+    // `is_reviewed`를 TRUE로 업데이트
+    const reviewUpdateQuery = `
+      UPDATE flight_user
+      SET is_reviewed = TRUE
+      WHERE flight_number = $1
+        AND seat_number = $2
+        AND food_order = $3;
     `;
-    const result = await client.query(query, [food_order]);
+    await client.query(reviewUpdateQuery, [flight_number, seat_number, food_order]);
 
-    await client.end();
+    // 트랜잭션 커밋
+    await client.query('COMMIT');
+    client.release();
 
+    // 성공 응답
     return new NextResponse(
-      JSON.stringify({ success: true, message: "Review updated successfully" }),
+      JSON.stringify({ success: true, message: "Review submitted successfully" }),
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error updating review:", error);
+    // 에러 발생 시 롤백
+    await client.query('ROLLBACK');
+    client.release();
+    console.error("Error processing review:", error);
+
     return new NextResponse(
-      JSON.stringify({ success: false, message: "Failed to update review" }),
+      JSON.stringify({ success: false, message: "Failed to submit review" }),
       { status: 500 }
     );
   }
