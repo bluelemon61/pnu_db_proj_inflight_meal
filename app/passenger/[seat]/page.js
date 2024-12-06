@@ -188,18 +188,18 @@ export default function Passenger() {
               ? <div className="flex justify-between gap-4">
                   <button 
                     className="w-full bg-white py-2 border-1 border-black"
-                    onClick={() => {
-                      postReview(flightNumber, seatNumber, ordered.food_id, true);
-                      alert('좋아요가 반영되었습니다.');
+                    onClick={async () => {
+                      const result = await postReview(flightNumber, seatNumber, ordered.food_order, true);
+                      if (result) return alert('좋아요가 반영되었습니다.');
                     }}
                   >
                     좋아요 👍
                   </button>
                   <button 
                     className="w-full bg-white py-2 border-1 border-black"
-                    onClick={() => {
-                      postReview(flightNumber, seatNumber, ordered.food_id, false);
-                      alert('싫어요가 반영되었습니다.');
+                    onClick={async () => {
+                      const result = await postReview(flightNumber, seatNumber, ordered.food_order, false);
+                      if (result) return alert('좋아요가 반영되었습니다.');
                     }}
                   >
                     싫어요 👎
