@@ -20,9 +20,10 @@ export async function postReview(flight_number, seat_number, food_order, is_like
     }),
   });
 
-  const data = await res.json();
+  if (res.status < 300) return true;
 
-  return data;
+  alert('이미 리뷰를 남겼습니다.');
+  return false;
 }
 
 /**
