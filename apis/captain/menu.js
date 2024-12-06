@@ -19,6 +19,8 @@ export async function putAirplainMenu(flight_number, food_id, food_target) {
   });
 
   if (res.status < 300) return true;
+
+  alert(`비행기가 '착륙' 상태일 때만 제공 대상 변경이 가능합니다.`);
   return false;
 }
 

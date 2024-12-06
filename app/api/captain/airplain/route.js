@@ -36,17 +36,31 @@ export async function POST(request) {
     );
 
     if (flight_state === '착륙') {
-      const initQuery = `
+      const initQuery1 = `
         UPDATE flight_user
         SET
           sleep_state = 'NORMAL',
           eat_count = 0,
-          food_order = NULL
+          food_order = NULL,
+          is_reviewed = FALSE
         WHERE flight_number = $1
         RETURNING *;
       `
-      const initResult = await client.query(initQuery, [flight_number]);
+      const initResult1 = await client.query(initQuery1, [flight_number]);
       console.log('승객 데이터 초기화 실행');
+    }
+
+    if (flight_state !== '정상운행') {
+      const initQuery2 = `
+        UPDATE flight
+        SET
+          serve = FALSE
+        WHERE flight_number = $1
+        RETURNING *;
+      `
+      const initResult2 = await client.query(initQuery2, [flight_number]);
+      console.log('비행기 기내식 제공 OFF로 초기화');
+
     }
 
     client.query('COMMIT');

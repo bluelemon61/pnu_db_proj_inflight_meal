@@ -10,6 +10,8 @@ import useInterval from "@/hooks/useInterval";
 import { useState } from "react";
 
 export default function Captain() {
+  const [isLoading, setIsLoading] = useState(true);
+  
   const [flightFood, setFlightFood] = useState([]); // 기내식 데이터 상태 관리
   const [captainFood, setCaptainFood] = useState([]); // 기내식 데이터 상태 관리
   const [mealService, setMealService] = useState(false); // 기내식 제공 상태 관리
@@ -49,7 +51,7 @@ export default function Captain() {
   // 기장 기내식 데이터 가져오는 함수
   async function fetchCaptainFood() {
     try {
-      const data = await getAirplainMenu(flightNumber, '기장');
+      const data = await getAirplainMenu(flightNumber, '직원');
       setCaptainFood(data); // 상태 업데이트
     } catch (error) {
       console.error("Error fetching flight food data:", error);
@@ -76,8 +78,6 @@ export default function Captain() {
 
       if (success) {
         setMealService(status); // 상태 업데이트
-      } else {
-        alert(`업데이트 실패`);
       }
     } catch (error) {
       console.error("Error updating meal service status:", error);
@@ -92,7 +92,17 @@ export default function Captain() {
     fetchFlightFood();
     fetchCaptainFood();
     fetchFlightStatus();
+
+    setIsLoading(false);
   }, interval);
+
+  if (isLoading) {
+    return (
+      <p className="py-16 w-full text-center text-2xl font-black">
+        로딩 중, 약 {interval/1000}초가 소요됩니다.
+      </p>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -140,6 +150,7 @@ export default function Captain() {
         </div>
         <div className="flex flex-col bg-gray-300 p-8">
           <h2 className="font-bold text-lg">기내식 구성</h2>
+          <p className="text-center">음식의 '제공 대상' 클릭 시 '승객'용 ↔ '직원'용 변경이 가능합니다.</p>
           <div className="flex flex-col">
             {/* 테이블 헤더 */}
             <div className="flex gap-4 justify-between py-2 border-b-2 border-black">
@@ -165,7 +176,7 @@ export default function Captain() {
                   <div 
                     className="w-1/6 text-center hover:bg-white hover:cursor-pointer"
                     onClick={()=>{
-                      const target = food.food_target === '승객' ? '기장' : '승객';
+                      const target = food.food_target === '승객' ? '직원' : '승객';
                       putAirplainMenu(flightNumber, food.food_id, target);
                     }}
                   >{food.food_target}</div>

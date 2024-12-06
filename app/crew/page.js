@@ -9,6 +9,8 @@ import useInterval from "@/hooks/useInterval";
 import { Fragment, useState } from "react";
 
 export default function Crew() {
+  const [isLoading, setIsLoading] = useState(true);
+
   const [rows, setRows] = useState(5);
   const [cols, setCols] = useState(4);
   const [flightState, setFlightState] = useState("로딩 중..."); // 비행기 상태
@@ -34,7 +36,7 @@ export default function Crew() {
       const pass = await getAirplainMenu(flightNumber, '승객');
       setPassFood(pass);
 
-      const crew = await getAirplainMenu(flightNumber, '기장');
+      const crew = await getAirplainMenu(flightNumber, '직원');
       setCrewFood(crew);
     }
 
@@ -52,7 +54,16 @@ export default function Crew() {
     flightGetter();
     menuGetter();
     passGetter();
+    setIsLoading(false);
   }, interval);
+
+  if (isLoading) {
+    return (
+      <p className="py-16 w-full text-center text-2xl font-black">
+        로딩 중, 약 {interval/1000}초가 소요됩니다.
+      </p>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-8 w-crew">

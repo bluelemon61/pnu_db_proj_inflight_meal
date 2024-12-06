@@ -7,6 +7,8 @@ import useInterval from "@/hooks/useInterval";
 import { useState } from "react"
 
 export default function Provider() {
+  const [isLoading, setIsLoading] = useState(true);
+  
   const [flightNumber, setFlightNumber] = useState(100);
   const [providerId, setProviderId] = useState(2);
 
@@ -32,7 +34,17 @@ export default function Provider() {
 
     provideListFetcher();
     flightListFetcher();
+
+    setIsLoading(false);
   }, interval);
+
+  if (isLoading) {
+    return (
+      <p className="py-16 w-full text-center text-2xl font-black">
+        로딩 중, 약 {interval/1000}초가 소요됩니다.
+      </p>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-8">

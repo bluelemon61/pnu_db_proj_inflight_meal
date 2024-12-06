@@ -12,14 +12,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-12">
-      <button
-        className="p-5 bg-gray-300" 
-        onClick={(e) => {
-          sqltest();
-        }}
-      >
-        SQL TEST
-      </button>
+      <div className="p-8 text-center border-2">접속할 역할을 선택해주세요.</div>
       <div className="flex justify-stretch gap-12">
         <Link href={'/captain'} className="flex w-full justify-center py-24 bg-gray-300">
           기장

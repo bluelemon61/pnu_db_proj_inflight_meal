@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Client } from "pg";
+import { Client, Pool } from "pg";
 
 /**
  * 기내식 목록을 불러온다.
@@ -88,16 +88,31 @@ export async function GET(request) {
 export async function PUT(request) {
   const { flight_number, food_id, food_target } = await request.json();
 
-  const client = new Client({
+  const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
   });
+  const client = await pool.connect();
 
   try {
-    await client.connect();
+    await client.query('BEGIN');
+
+    const checkquery = `
+      SELECT *
+      FROM flight
+      WHERE flight_number = $1 AND flight_state = '착륙';
+    `
+    const checkResult = await client.query(checkquery, [flight_number]);
+    if (checkResult.rows.length == 0) {
+      await client.query('ROLLBACK');
+      return new NextResponse(
+        JSON.stringify({ success: false, message: "비행기가 착륙 상태가 아님" }),
+        { status: 400 }
+      );
+    }
 
     const query = `
       UPDATE
@@ -108,7 +123,7 @@ export async function PUT(request) {
     `;
     const result = await client.query(query, [flight_number, food_id, food_target]);
   
-    await client.end();
+    await client.query('COMMIT');
 
     return new NextResponse(null, { status: 200 });
   } catch (error) {
@@ -117,5 +132,7 @@ export async function PUT(request) {
       JSON.stringify({ success: false, message: "Failed to fetch menu" }),
       { status: 500 }
     );
+  } finally {
+    client.release();
   }
 }

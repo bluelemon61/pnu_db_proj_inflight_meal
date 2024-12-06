@@ -56,7 +56,7 @@ export async function POST(request) {
   // flight_food에 데이터를 삽입하는 쿼리
   const query = `
     INSERT INTO flight_food (flight_number, food_id, food_count, food_target)
-    SELECT $1, id, $3, '기장'
+    SELECT $1, id, $3, '직원'
     FROM food
     WHERE food.id = $2
     RETURNING food_id, food_count, food_target;

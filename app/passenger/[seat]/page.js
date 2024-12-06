@@ -12,6 +12,8 @@ import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useState } from "react"
 
 export default function Passenger() {
+  const [isLoading, setIsLoading] = useState(true);
+
   const seatNumber = parseInt(usePathname().split('/')[2]);
 
   const [flightNumber, setFlightNumber] = useState(100);
@@ -67,6 +69,8 @@ export default function Passenger() {
 
     airplainFetcher();
     eatenFetcher();
+    
+    setIsLoading(false);
   }, interval);
 
   useEffect(() => {
@@ -80,6 +84,14 @@ export default function Passenger() {
 
     if (passengerState !== null) sleepHandler();
   }, [passengerState])
+
+  if (isLoading) {
+    return (
+      <p className="py-16 w-full text-center text-2xl font-black">
+        로딩 중, 약 {interval/1000}초가 소요됩니다.
+      </p>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-8">
