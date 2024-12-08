@@ -21,6 +21,8 @@
 1. 프로젝트 실행에 필요한 테이블 생성 및 데이터 삽입
 ```bash
 # hostname, port_number, username, databasename을 환경에 맞게 입력해주세요.
+# DB_dump.sql 파일은 프로젝트에 필요한 테이블 및 튜플을 담고있습니다.
+# Root 폴더에서 실행해주세요.
 psql -h hostname -p port_number -U username -f DB_dump.sql databasename
 ```
 
